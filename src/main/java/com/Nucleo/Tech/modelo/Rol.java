@@ -2,6 +2,8 @@ package com.Nucleo.Tech.modelo;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Rol {
     @Id
@@ -9,14 +11,13 @@ public class Rol {
     private Long id;
     private String tipo;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
+    @OneToMany(mappedBy = "rol", cascade = CascadeType.ALL)
+    private List<Usuario> usuario;
 
     public Rol() {
     }
 
-    public Rol(Long id, String tipo, Usuario usuario) {
+    public Rol(Long id, String tipo, List<Usuario> usuario) {
         this.id = id;
         this.tipo = tipo;
         this.usuario = usuario;
@@ -38,11 +39,11 @@ public class Rol {
         this.tipo = tipo;
     }
 
-    public Usuario getUsuario() {
+    public List<Usuario> getUsuario() {
         return usuario;
     }
 
-    public void setUsuario(Usuario usuario) {
+    public void setUsuario(List<Usuario> usuario) {
         this.usuario = usuario;
     }
 }

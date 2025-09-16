@@ -4,8 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import jakarta.persistence.Id;
 
-import java.util.List;
-
 @Entity
 public class DetalleCarrito {
     @Id
@@ -18,14 +16,14 @@ public class DetalleCarrito {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "carrito_id")
-    private List<Carrito> carrito;
+    private Carrito carrito;
 
     public DetalleCarrito() {
     }
 
-    public DetalleCarrito(Long id, int cantidad, double precioTotal, Producto producto, List<Carrito> carrito) {
+    public DetalleCarrito(Long id, int cantidad, double precioTotal, Producto producto, Carrito carrito) {
         this.id = id;
         this.cantidad = cantidad;
         this.precioTotal = precioTotal;
@@ -65,11 +63,11 @@ public class DetalleCarrito {
         this.producto = producto;
     }
 
-    public List<Carrito> getCarrito() {
+    public Carrito getCarrito() {
         return carrito;
     }
 
-    public void setCarrito(List<Carrito> carrito) {
+    public void setCarrito(Carrito carrito) {
         this.carrito = carrito;
     }
 }

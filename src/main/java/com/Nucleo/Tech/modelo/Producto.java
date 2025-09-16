@@ -2,6 +2,8 @@ package com.Nucleo.Tech.modelo;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Producto {
     @Id
@@ -22,19 +24,23 @@ public class Producto {
     @JoinColumn(name = "marca_id")
     private Marca marca;
 
+    @OneToMany(mappedBy = "producto")
+    private java.util.List<DetalleCarrito> detalles;
+
     public Producto() {
     }
 
-    public Producto(Long id, String nombre, Double precio, int stock, String descripcion, String especificaciones, String imagenUrl, Categoria categoria, Marca marca) {
+    public Producto(Long id, String nombre, Double precio, int stock, String especificaciones, String descripcion, String imagenUrl, Categoria categoria, Marca marca, List<DetalleCarrito> detalles) {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
-        this.descripcion = descripcion;
         this.especificaciones = especificaciones;
+        this.descripcion = descripcion;
         this.imagenUrl = imagenUrl;
         this.categoria = categoria;
         this.marca = marca;
+        this.detalles = detalles;
     }
 
     public Long getId() {
@@ -107,5 +113,13 @@ public class Producto {
 
     public void setMarca(Marca marca) {
         this.marca = marca;
+    }
+
+    public List<DetalleCarrito> getDetalles() {
+        return detalles;
+    }
+
+    public void setDetalles(List<DetalleCarrito> detalles) {
+        this.detalles = detalles;
     }
 }

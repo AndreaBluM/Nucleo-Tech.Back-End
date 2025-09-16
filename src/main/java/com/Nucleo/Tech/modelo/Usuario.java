@@ -13,19 +13,22 @@ public class Usuario {
     private String correo;
     private String contrasena;
 
-    @OneToMany
-    @JoinColumn(name = "usuario_id")
-    private List<Rol> roles;
+    @ManyToOne
+    @JoinColumn(name = "rol_id")
+    private Rol rol;
+
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private Carrito carrito;
 
     public Usuario() {
     }
 
-    public Usuario(Long id, String nombre, String correo, String contrasena, List<Rol> roles) {
+    public Usuario(Long id, String nombre, String correo, String contrasena, Rol rol) {
         this.id = id;
         this.nombre = nombre;
         this.correo = correo;
         this.contrasena = contrasena;
-        this.roles = roles;
+        this.rol = rol;
     }
 
     public Long getId() {
@@ -60,11 +63,11 @@ public class Usuario {
         this.contrasena = contrasena;
     }
 
-    public List<Rol> getRoles() {
-        return roles;
+    public Rol getRol() {
+        return rol;
     }
 
-    public void setRoles(List<Rol> roles) {
-        this.roles = roles;
+    public void setRol(Rol rol) {
+        this.rol = rol;
     }
 }

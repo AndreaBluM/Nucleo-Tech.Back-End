@@ -3,6 +3,7 @@ package com.Nucleo.Tech.modelo;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class Carrito {
@@ -15,13 +16,17 @@ public class Carrito {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
+    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL)
+    private List<DetalleCarrito> detalles;
+
     public Carrito() {
     }
 
-    public Carrito(Long id, Date fecha, Usuario usuario) {
+    public Carrito(Long id, Date fecha, Usuario usuario, List<DetalleCarrito> detalles) {
         this.id = id;
         this.fecha = fecha;
         this.usuario = usuario;
+        this.detalles = detalles;
     }
 
     public Long getId() {
@@ -46,5 +51,13 @@ public class Carrito {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public List<DetalleCarrito> getDetalles() {
+        return detalles;
+    }
+
+    public void setDetalles(List<DetalleCarrito> detalles) {
+        this.detalles = detalles;
     }
 }

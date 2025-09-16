@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ICategoriaService {
-    List<Categoria> listarCategorias();
-    Optional<Categoria> obtenerCategoriaPorId(Long id);
-    Categoria guardarCategoria(Categoria categoria);
-    void eliminarCategoria(Long id);
+    List<Categoria> obtenerTodas();
+    Optional<Categoria> obtenerPorId(Long id);
+    Categoria guardar(Categoria categoria);
+    void eliminar(Long id);
+    boolean existePorId(Long id);
+    List<Categoria> buscarPorNombre(String nombre);
 }

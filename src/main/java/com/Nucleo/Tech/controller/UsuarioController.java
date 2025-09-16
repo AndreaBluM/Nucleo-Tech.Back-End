@@ -3,49 +3,75 @@ package com.Nucleo.Tech.controller;
 import com.Nucleo.Tech.modelo.Usuario;
 import com.Nucleo.Tech.service.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/api/usuarios")
+@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     @Autowired
     private IUsuarioService usuarioService;
 
     @GetMapping
-    public List<Usuario> listarUsuarios() {
-        return usuarioService.listarUsuarios();
+    public ResponseEntity<List<Usuario>> obtenerTodos() {
+        List<Usuario> usuarios = usuarioService.obtenerTodos();
+        return new ResponseEntity<>(usuarios, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerUsuario(@PathVariable Long id) {
-        return usuarioService.obtenerUsuarioPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Usuario> obtenerPorId(@PathVariable Long id) {
+        Optional<Usuario> usuario = usuarioService.obtenerPorId(id);
+        return usuario.map(u -> new ResponseEntity<>(u, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping
-    public ResponseEntity<Usuario> guardarUsuario(@RequestBody Usuario usuario) {
-        Usuario nuevo = usuarioService.guardarUsuario(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+    @PostMapping("/crear")
+    public ResponseEntity<Usuario> crear(@RequestBody Usuario usuario) {
+        // Verificar si el correo ya existe
+        if (usuarioService.buscarPorEmail(usuario.getCorreo()).isPresent()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT); // Código 409 para conflicto
+        }
+
+        Usuario nuevoUsuario = usuarioService.guardar(usuario);
+        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+        if (!usuarioService.existePorId(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        // Verificar si otro usuario ya tiene ese correo
+        Optional<Usuario> usuarioExistente = usuarioService.buscarPorEmail(usuario.getCorreo());
+        if (usuarioExistente.isPresent() && !usuarioExistente.get().getId().equals(id)) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
+        usuario.setId(id);
+        Usuario usuarioActualizado = usuarioService.guardar(usuario);
+        return new ResponseEntity<>(usuarioActualizado, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
-        usuarioService.eliminarUsuario(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        if (!usuarioService.existePorId(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        usuarioService.eliminar(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/buscar")
-    public ResponseEntity<Usuario> buscarPorEmail(@RequestParam String email) {
-        return usuarioService.buscarPorEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Usuario> buscarPorEmail(@PathVariable String email) {
+        Optional<Usuario> usuario = usuarioService.buscarPorEmail(email);
+        return usuario.map(u -> new ResponseEntity<>(u, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }
-
-

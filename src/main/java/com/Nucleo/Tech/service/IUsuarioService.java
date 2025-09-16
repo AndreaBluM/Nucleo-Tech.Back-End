@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IUsuarioService {
-    List<Usuario> listarUsuarios();
-    Optional<Usuario> obtenerUsuarioPorId(Long id);
-    Usuario guardarUsuario(Usuario usuario);
-    void eliminarUsuario(Long id);
+    List<Usuario> obtenerTodos();
+    Optional<Usuario> obtenerPorId(Long id);
+    Usuario guardar(Usuario usuario);
+    void eliminar(Long id);
+    boolean existePorId(Long id);
     Optional<Usuario> buscarPorEmail(String email);
 }

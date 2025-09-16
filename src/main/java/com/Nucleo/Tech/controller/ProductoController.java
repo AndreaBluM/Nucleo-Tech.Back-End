@@ -2,6 +2,7 @@ package com.Nucleo.Tech.controller;
 
 import com.Nucleo.Tech.modelo.Producto;
 import com.Nucleo.Tech.service.IProductoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,62 +11,66 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/productos")
+@RequestMapping("/api/productos")
+@CrossOrigin(origins = "*")
 public class ProductoController {
 
-    private final IProductoService productoService;
+    @Autowired
+    private IProductoService productoService;
 
-    public ProductoController(IProductoService productoService) {
-        this.productoService = productoService;
-    }
-
-    // Listar todos los productos
     @GetMapping
-    public List<Producto> listar() {
-        return productoService.listarProductos();
+    public ResponseEntity<List<Producto>> obtenerTodos() {
+        List<Producto> productos = productoService.obtenerTodos();
+        return new ResponseEntity<>(productos, HttpStatus.OK);
     }
 
-    // Obtener un producto por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> obtener(@PathVariable Long id) {
-        Optional<Producto> producto = productoService.obtenerProductoPorId(id);
-        return producto.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Producto> obtenerPorId(@PathVariable Long id) {
+        Optional<Producto> producto = productoService.obtenerPorId(id);
+        return producto.map(p -> new ResponseEntity<>(p, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Crear un producto
     @PostMapping
     public ResponseEntity<Producto> crear(@RequestBody Producto producto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productoService.guardarProducto(producto));
+        Producto nuevoProducto = productoService.guardar(producto);
+        return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED);
     }
 
-    // Actualizar un producto
     @PutMapping("/{id}")
     public ResponseEntity<Producto> actualizar(@PathVariable Long id, @RequestBody Producto producto) {
-        Optional<Producto> existente = productoService.obtenerProductoPorId(id);
-        if (existente.isEmpty()) return ResponseEntity.notFound().build();
-
-        Producto actualizado = existente.get();
-        actualizado.setNombre(producto.getNombre());
-        actualizado.setPrecio(producto.getPrecio());
-        actualizado.setCategoria(producto.getCategoria());
-        actualizado.setMarca(producto.getMarca());
-
-        return ResponseEntity.ok(productoService.guardarProducto(actualizado));
+        if (!productoService.existePorId(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        producto.setId(id);
+        Producto productoActualizado = productoService.guardar(producto);
+        return new ResponseEntity<>(productoActualizado, HttpStatus.OK);
     }
 
-    // Eliminar un producto
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        Optional<Producto> existente = productoService.obtenerProductoPorId(id);
-        if (existente.isEmpty()) return ResponseEntity.notFound().build();
-
-        productoService.eliminarProducto(id);
-        return ResponseEntity.noContent().build();
+        if (!productoService.existePorId(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        productoService.eliminar(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // Buscar productos por marca
+    @GetMapping("/categoria/{categoriaId}")
+    public ResponseEntity<List<Producto>> obtenerPorCategoria(@PathVariable Long categoriaId) {
+        List<Producto> productos = productoService.obtenerPorCategoria(categoriaId);
+        return new ResponseEntity<>(productos, HttpStatus.OK);
+    }
+
     @GetMapping("/marca/{marcaId}")
-    public List<Producto> buscarPorMarca(@PathVariable Long marcaId) {
-        return productoService.buscarPorMarca(marcaId);
+    public ResponseEntity<List<Producto>> obtenerPorMarca(@PathVariable Long marcaId) {
+        List<Producto> productos = productoService.obtenerPorMarca(marcaId);
+        return new ResponseEntity<>(productos, HttpStatus.OK);
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Producto>> buscarPorNombre(@RequestParam String nombre) {
+        List<Producto> productos = productoService.buscarPorNombre(nombre);
+        return new ResponseEntity<>(productos, HttpStatus.OK);
     }
 }

@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ICarritoService {
-    List<Carrito> listarCarritos();
-    Optional<Carrito> obtenerCarritoPorId(Long id);
-    Carrito guardarCarrito(Carrito carrito);
-    void eliminarCarrito(Long id);
-    Optional<Carrito> obtenerCarritoDeUsuario(Long usuarioId);
+    List<Carrito> obtenerTodos();
+    Optional<Carrito> obtenerPorId(Long id);
+    Carrito guardar(Carrito carrito);
+    void eliminar(Long id);
+    boolean existePorId(Long id);
+    Optional<Carrito> buscarPorUsuarioId(Long usuarioId);
 }

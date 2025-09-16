@@ -12,9 +12,9 @@ public class Categoria {
     private String nombre;
 
 
-    @OneToMany
-    @JoinColumn(name = "categoria_id")
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
     private List<Producto> producto;
+
 
     public Categoria() {
     }
