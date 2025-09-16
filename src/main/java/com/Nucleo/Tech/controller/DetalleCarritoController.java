@@ -33,21 +33,17 @@ public class DetalleCarritoController {
 
     @PostMapping
     public ResponseEntity<DetalleCarrito> crear(@RequestBody DetalleCarrito detalleCarrito) {
-        // Verificar si ya existe el producto en el carrito
         Optional<DetalleCarrito> detalleExistente = detalleCarritoService.buscarDetalleCarritoPorProductoYCarrito(
                 detalleCarrito.getProducto().getId(),
                 detalleCarrito.getCarrito().getId()
         );
 
         if (detalleExistente.isPresent()) {
-            // Si ya existe, actualizar la cantidad en lugar de crear uno nuevo
             DetalleCarrito detalle = detalleExistente.get();
             detalle.setCantidad(detalle.getCantidad() + detalleCarrito.getCantidad());
             DetalleCarrito detalleActualizado = detalleCarritoService.guardar(detalle);
             return new ResponseEntity<>(detalleActualizado, HttpStatus.OK);
         }
-
-        // Si no existe, crear uno nuevo
         DetalleCarrito nuevoDetalle = detalleCarritoService.guardar(detalleCarrito);
         return new ResponseEntity<>(nuevoDetalle, HttpStatus.CREATED);
     }

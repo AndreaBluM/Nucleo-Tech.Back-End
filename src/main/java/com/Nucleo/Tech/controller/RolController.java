@@ -33,7 +33,6 @@ public class RolController {
 
     @PostMapping
     public ResponseEntity<Rol> crear(@RequestBody Rol rol) {
-        // Verificar si ya existe un rol con ese nombre
         Optional<Rol> rolExistente = rolService.buscarPorNombre(rol.getTipo());
         if (rolExistente.isPresent()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);

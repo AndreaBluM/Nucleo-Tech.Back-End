@@ -33,9 +33,8 @@ public class UsuarioController {
 
     @PostMapping("/crear")
     public ResponseEntity<Usuario> crear(@RequestBody Usuario usuario) {
-        // Verificar si el correo ya existe
         if (usuarioService.buscarPorEmail(usuario.getCorreo()).isPresent()) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT); // Código 409 para conflicto
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
         Usuario nuevoUsuario = usuarioService.guardar(usuario);
@@ -47,8 +46,6 @@ public class UsuarioController {
         if (!usuarioService.existePorId(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
-        // Verificar si otro usuario ya tiene ese correo
         Optional<Usuario> usuarioExistente = usuarioService.buscarPorEmail(usuario.getCorreo());
         if (usuarioExistente.isPresent() && !usuarioExistente.get().getId().equals(id)) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
