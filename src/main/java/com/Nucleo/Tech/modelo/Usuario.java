@@ -1,5 +1,6 @@
 package com.Nucleo.Tech.modelo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -9,8 +10,11 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String nombre;
+    @JsonProperty("email")
     private String correo;
+    @JsonProperty("password")
     private String contrasena;
 
     @ManyToOne

@@ -11,4 +11,5 @@ public interface IUsuarioService {
     void eliminar(Long id);
     boolean existePorId(Long id);
     Optional<Usuario> buscarPorEmail(String email);
+    Usuario autenticar(String correo, String contrasena);
 }

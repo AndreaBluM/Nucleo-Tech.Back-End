@@ -13,7 +13,6 @@ public class Marca {
     @OneToMany(mappedBy = "marca", cascade = CascadeType.ALL)
     private List<Producto> productos;
 
-    // Constructores
     public Marca() {
     }
 
@@ -22,7 +21,6 @@ public class Marca {
         this.nombre = nombre;
     }
 
-    // Getters y Setters
     public Long getId() {
         return id;
     }

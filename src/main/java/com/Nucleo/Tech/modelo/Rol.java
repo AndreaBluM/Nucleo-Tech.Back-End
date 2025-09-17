@@ -46,4 +46,5 @@ public class Rol {
     public void setUsuario(List<Usuario> usuario) {
         this.usuario = usuario;
     }
+
 }

@@ -31,7 +31,7 @@ public class ProductoController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping
+    @PostMapping("/crear")
     public ResponseEntity<Producto> crear(@RequestBody Producto producto) {
         Producto nuevoProducto = productoService.guardar(producto);
         return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED);
