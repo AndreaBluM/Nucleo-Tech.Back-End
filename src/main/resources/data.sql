@@ -3,6 +3,7 @@ INSERT INTO categoria (id, nombre) VALUES (2, 'Fuentes');
 INSERT INTO categoria (id, nombre) VALUES (3, 'Refrigeracion');
 INSERT INTO categoria (id, nombre) VALUES (4, 'Teclados/Mouses');
 INSERT INTO categoria (id, nombre) VALUES (5, 'Monitores');
+INSERT INTO categoria (id, nombre) VALUES (6, 'pruebas');
 INSERT INTO rol (id, tipo) VALUES (1, 'costumer');
 INSERT INTO rol (id, tipo) VALUES (2, 'admin');
 INSERT INTO marca (id, nombre) VALUES (1, 'Asus');"
