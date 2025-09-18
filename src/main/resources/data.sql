@@ -1,3 +1,5 @@
+DELETE FROM rol;
+DELETE FROM categoria;
 INSERT INTO categoria (id, nombre) VALUES (1, 'Chasis');
 INSERT INTO categoria (id, nombre) VALUES (2, 'Fuentes');
 INSERT INTO categoria (id, nombre) VALUES (3, 'Refrigeracion');
