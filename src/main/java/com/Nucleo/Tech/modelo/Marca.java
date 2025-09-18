@@ -12,7 +12,6 @@ public class Marca {
     private Long id;
     private String nombre;
 
-    @JsonIgnore
     @JsonManagedReference
     @OneToMany(mappedBy = "marca", cascade = CascadeType.ALL)
     private List<Producto> productos;

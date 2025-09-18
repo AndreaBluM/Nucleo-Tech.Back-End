@@ -31,7 +31,7 @@ public class MarcaController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping
+    @PostMapping("/crear")
     public ResponseEntity<Marca> crear(@RequestBody Marca marca) {
         Marca nuevaMarca = marcaService.guardar(marca);
         return new ResponseEntity<>(nuevaMarca, HttpStatus.CREATED);
