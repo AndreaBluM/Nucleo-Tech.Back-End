@@ -1,5 +1,7 @@
 package com.Nucleo.Tech.modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -10,6 +12,8 @@ public class Marca {
     private Long id;
     private String nombre;
 
+    @JsonIgnore
+    @JsonManagedReference
     @OneToMany(mappedBy = "marca", cascade = CascadeType.ALL)
     private List<Producto> productos;
 

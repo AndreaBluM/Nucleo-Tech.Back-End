@@ -1,5 +1,6 @@
 package com.Nucleo.Tech.modelo;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class Producto {
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "marca_id")
     private Marca marca;
