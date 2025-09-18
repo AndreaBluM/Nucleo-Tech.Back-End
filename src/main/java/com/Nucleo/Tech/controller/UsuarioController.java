@@ -1,6 +1,6 @@
 package com.Nucleo.Tech.controller;
 
-import com.Nucleo.Tech.dto.UsuarioDto;
+
 import com.Nucleo.Tech.modelo.Usuario;
 import com.Nucleo.Tech.service.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,16 +74,13 @@ public class UsuarioController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<Usuario> login(@RequestBody UsuarioDto usuarioDto) {
-        Optional<Usuario> usuario = usuarioService.buscarPorEmail(usuarioDto.getCorreo());
-        if (usuario.isPresent() && usuario.get().getContrasena().equals(usuarioDto.getContrasena())) {
-            return new ResponseEntity<>(usuario.get(), HttpStatus.OK);
+    @PostMapping("/autenticar")
+    public ResponseEntity<Usuario> autenticar(@RequestBody Usuario usuario) {
+        Usuario usuarioAutenticado = usuarioService.autenticar(usuario.getCorreo(), usuario.getContrasena());
+        if (usuarioAutenticado != null) {
+            return new ResponseEntity<>(usuarioAutenticado, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
 }
-
-
-

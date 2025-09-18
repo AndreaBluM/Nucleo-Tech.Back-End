@@ -1,5 +1,6 @@
 package com.Nucleo.Tech.modelo;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -12,6 +13,7 @@ public class Carrito {
     private Long id;
     private Date fecha;
 
+    @JsonBackReference
     @OneToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;

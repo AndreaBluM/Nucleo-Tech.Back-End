@@ -1,5 +1,7 @@
 package com.Nucleo.Tech.modelo;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
@@ -17,10 +19,12 @@ public class Usuario {
     @JsonProperty("password")
     private String contrasena;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "rol_id")
     private Rol rol;
 
+    @JsonManagedReference
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     private Carrito carrito;
 
