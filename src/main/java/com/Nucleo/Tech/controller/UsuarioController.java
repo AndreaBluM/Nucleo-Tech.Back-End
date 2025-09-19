@@ -1,6 +1,7 @@
 package com.Nucleo.Tech.controller;
 
 
+import com.Nucleo.Tech.dto.UsuarioDto;
 import com.Nucleo.Tech.modelo.Usuario;
 import com.Nucleo.Tech.service.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +35,15 @@ public class UsuarioController {
     }
 
     @PostMapping("/crear")
-    public ResponseEntity<Usuario> crear(@RequestBody Usuario usuario) {
-        if (usuarioService.buscarPorEmail(usuario.getCorreo()).isPresent()) {
+    public ResponseEntity<Usuario> crear(@RequestBody UsuarioDto usuarioDto) {
+        if (usuarioService.buscarPorEmail(usuarioDto.getCorreo()).isPresent()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
-
+        // Convertir UsuarioDto a Usuario
+        Usuario usuario = new Usuario();
+        usuario.setNombre(usuarioDto.getNombre());
+        usuario.setCorreo(usuarioDto.getCorreo());
+        usuario.setContrasena(usuarioDto.getContrasena());
         Usuario nuevoUsuario = usuarioService.guardar(usuario);
         return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
     }
