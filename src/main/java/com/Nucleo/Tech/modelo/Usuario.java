@@ -13,8 +13,11 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private String nombre;
+    @JsonProperty("email")
     private String correo;
+    @JsonProperty("email")
     private String contrasena;
 
     @JsonBackReference
