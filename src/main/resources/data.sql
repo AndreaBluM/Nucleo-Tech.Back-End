@@ -1,6 +1,4 @@
-DELETE FROM rol;
-DELETE FROM categoria;
-DELETE FROM usuario;
+
 INSERT INTO categoria (id, nombre) VALUES (1, 'Chasis');
 INSERT INTO categoria (id, nombre) VALUES (2, 'Fuentes');
 INSERT INTO categoria (id, nombre) VALUES (3, 'Refrigeracion');
@@ -10,4 +8,4 @@ INSERT INTO categoria (id, nombre) VALUES (6, 'pruebas');
 INSERT INTO rol (id, tipo) VALUES (1, 'costumer');
 INSERT INTO rol (id, tipo) VALUES (2, 'admin');
 INSERT INTO marca (id, nombre) VALUES (1, 'Asus');
-INSERT INTO usuario (id, nombre, email, password ) VALUES (1, 'Juan Perez', 'juanperez@gmail.com', '1234Segura!');
+
