@@ -17,6 +17,9 @@ public class Producto {
     private String descripcion;
     private String especificaciones;
 
+    @Column(name = "imagen_url")
+    private String imagenUrl;
+
     @Lob
     private String imagenBase64;
 
@@ -35,7 +38,7 @@ public class Producto {
     public Producto() {
     }
 
-    public Producto(Long id, String nombre, Double precio, int stock, String especificaciones, String descripcion, String imagenBase64, Categoria categoria, Marca marca, List<DetalleCarrito> detalles) {
+    public Producto(Long id, String nombre, Double precio, int stock, String especificaciones, String descripcion, String imagenBase64, Categoria categoria, Marca marca, List<DetalleCarrito> detalles, String imagenUrl) {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
@@ -46,6 +49,7 @@ public class Producto {
         this.categoria = categoria;
         this.marca = marca;
         this.detalles = detalles;
+        this.imagenUrl = imagenUrl;
     }
 
     public Long getId() {
@@ -126,5 +130,12 @@ public class Producto {
 
     public void setDetalles(List<DetalleCarrito> detalles) {
         this.detalles = detalles;
+    }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
     }
 }
