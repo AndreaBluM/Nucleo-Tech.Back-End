@@ -20,7 +20,7 @@ public class Producto {
     @Column(name = "imagen_url")
     private String imagenUrl;
 
-    @Lob
+    @Transient
     private String imagenBase64;
 
     @ManyToOne
