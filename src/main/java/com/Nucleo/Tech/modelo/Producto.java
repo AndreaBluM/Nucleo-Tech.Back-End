@@ -18,7 +18,6 @@ public class Producto {
     private String especificaciones;
 
     @Lob
-    @JsonProperty("imagenBase64")
     private String imagenBase64;
 
     @ManyToOne
