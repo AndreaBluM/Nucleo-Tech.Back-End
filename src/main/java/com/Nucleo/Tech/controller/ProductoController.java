@@ -1,7 +1,13 @@
 package com.Nucleo.Tech.controller;
 
+import com.Nucleo.Tech.dto.ProductoDto;
+import com.Nucleo.Tech.modelo.Categoria;
+import com.Nucleo.Tech.modelo.Marca;
 import com.Nucleo.Tech.modelo.Producto;
 import com.Nucleo.Tech.service.IProductoService;
+import com.Nucleo.Tech.respository.IproductoRepository;
+import com.Nucleo.Tech.respository.IcategoriaRepository;
+import com.Nucleo.Tech.respository.ImarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +23,12 @@ public class ProductoController {
 
     @Autowired
     private IProductoService productoService;
+
+    @Autowired
+    private IcategoriaRepository categoriaRepository;
+
+    @Autowired
+    private ImarcaRepository marcaRepository;
 
     @GetMapping
     public ResponseEntity<List<Producto>> obtenerTodos() {
@@ -72,5 +84,25 @@ public class ProductoController {
     public ResponseEntity<List<Producto>> buscarPorNombre(@RequestParam String nombre) {
         List<Producto> productos = productoService.buscarPorNombre(nombre);
         return new ResponseEntity<>(productos, HttpStatus.OK);
+    }
+
+    @PostMapping("/crear-dto")
+    public ResponseEntity<Producto> crearConDto(@RequestBody ProductoDto productoDto) {
+        Optional<Categoria> categoriaOpt = categoriaRepository.findById(productoDto.getCategoriaId());
+        Optional<Marca> marcaOpt = marcaRepository.findById(productoDto.getMarcaId());
+        if (categoriaOpt.isEmpty() || marcaOpt.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Producto producto = new Producto();
+        producto.setNombre(productoDto.getNombre());
+        producto.setPrecio(productoDto.getPrecio());
+        producto.setStock(productoDto.getStock());
+        producto.setDescripcion(productoDto.getDescripcion());
+        producto.setEspecificaciones(productoDto.getEspecificaciones());
+        producto.setImagenBase64(productoDto.getImagenBase64());
+        producto.setCategoria(categoriaOpt.get());
+        producto.setMarca(marcaOpt.get());
+        Producto nuevoProducto = productoService.guardar(producto);
+        return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED);
     }
 }

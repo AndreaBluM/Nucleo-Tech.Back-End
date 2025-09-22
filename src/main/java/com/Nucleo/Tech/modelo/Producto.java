@@ -15,7 +15,9 @@ public class Producto {
     private int stock;
     private String descripcion;
     private String especificaciones;
-    private String imagenUrl;
+
+    @Lob
+    private String imagenBase64;
 
     @ManyToOne
     @JoinColumn(name = "categoria_id")
@@ -32,14 +34,14 @@ public class Producto {
     public Producto() {
     }
 
-    public Producto(Long id, String nombre, Double precio, int stock, String especificaciones, String descripcion, String imagenUrl, Categoria categoria, Marca marca, List<DetalleCarrito> detalles) {
+    public Producto(Long id, String nombre, Double precio, int stock, String especificaciones, String descripcion, String imagenBase64, Categoria categoria, Marca marca, List<DetalleCarrito> detalles) {
         this.id = id;
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
         this.especificaciones = especificaciones;
         this.descripcion = descripcion;
-        this.imagenUrl = imagenUrl;
+        this.imagenBase64 = imagenBase64;
         this.categoria = categoria;
         this.marca = marca;
         this.detalles = detalles;
@@ -93,12 +95,12 @@ public class Producto {
         this.especificaciones = especificaciones;
     }
 
-    public String getImagenUrl() {
-        return imagenUrl;
+    public String getImagenBase64() {
+        return imagenBase64;
     }
 
-    public void setImagenUrl(String imagenUrl) {
-        this.imagenUrl = imagenUrl;
+    public void setImagenBase64(String imagenBase64) {
+        this.imagenBase64 = imagenBase64;
     }
 
     public Categoria getCategoria() {

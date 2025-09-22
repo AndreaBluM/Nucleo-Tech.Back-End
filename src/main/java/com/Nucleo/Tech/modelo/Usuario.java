@@ -17,7 +17,7 @@ public class Usuario {
     private String nombre;
     @JsonProperty("email")
     private String correo;
-    @JsonProperty("email")
+    @JsonProperty("password")
     private String contrasena;
 
     @JsonBackReference
