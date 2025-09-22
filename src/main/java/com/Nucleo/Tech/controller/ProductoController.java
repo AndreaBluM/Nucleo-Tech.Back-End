@@ -43,61 +43,9 @@ public class ProductoController {
     }
 
     @PostMapping("/crear")
-    public ResponseEntity<Producto> crear(@RequestBody ProductoCreateDto productoDto) {
-        try {
-            System.out.println("Recibiendo solicitud para crear producto");
-
-            // Validaciones básicas
-            if (productoDto.getNombre() == null || productoDto.getNombre().trim().isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            // Crear un nuevo objeto Producto a partir del DTO
-            Producto producto = new Producto();
-            producto.setNombre(productoDto.getNombre());
-            producto.setPrecio(productoDto.getPrecio());
-            producto.setStock(productoDto.getStock());
-            producto.setDescripcion(productoDto.getDescripcion());
-            producto.setEspecificaciones(productoDto.getEspecificaciones());
-            producto.setImagenBase64(productoDto.getImagenBase64());
-
-            // Obtener y establecer la categoría
-            if (productoDto.getCategoriaId() != null) {
-                Optional<Categoria> categoriaOpt = categoriaRepository.findById(productoDto.getCategoriaId());
-                if (categoriaOpt.isPresent()) {
-                    producto.setCategoria(categoriaOpt.get());
-                } else {
-                    System.out.println("Categoría no encontrada con ID: " + productoDto.getCategoriaId());
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            } else {
-                System.out.println("No se especificó categoría");
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            // Obtener y establecer la marca
-            if (productoDto.getMarcaId() != null) {
-                Optional<Marca> marcaOpt = marcaRepository.findById(productoDto.getMarcaId());
-                if (marcaOpt.isPresent()) {
-                    producto.setMarca(marcaOpt.get());
-                } else {
-                    System.out.println("Marca no encontrada con ID: " + productoDto.getMarcaId());
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            } else {
-                System.out.println("No se especificó marca");
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            // Guardar el producto
-            Producto productoGuardado = productoService.guardar(producto);
-            System.out.println("Producto guardado correctamente con ID: " + productoGuardado.getId());
-            return new ResponseEntity<>(productoGuardado, HttpStatus.CREATED);
-        } catch (Exception e) {
-            System.out.println("Error al crear producto: " + e.getMessage());
-            e.printStackTrace(); // Log para depuración
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<Producto> crear(@RequestBody Producto producto) {
+        Producto nuevoProducto = productoService.guardar(producto);
+        return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
