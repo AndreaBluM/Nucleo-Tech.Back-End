@@ -1,8 +1,5 @@
 package com.Nucleo.Tech.controller;
 
-import com.Nucleo.Tech.dto.ProductoCreateDto;
-import com.Nucleo.Tech.modelo.Categoria;
-import com.Nucleo.Tech.modelo.Marca;
 import com.Nucleo.Tech.modelo.Producto;
 import com.Nucleo.Tech.service.IProductoService;
 import com.Nucleo.Tech.respository.IcategoriaRepository;
@@ -89,55 +86,6 @@ public class ProductoController {
         return new ResponseEntity<>(productos, HttpStatus.OK);
     }
 
-    @PostMapping("/crear-con-imagen")
-    public ResponseEntity<Producto> crearConImagen(@RequestBody Producto producto) {
-        try {
-            System.out.println("=== DEBUGGING CREAR CON IMAGEN ===");
-            System.out.println("Nombre: " + producto.getNombre());
-            System.out.println("Precio: " + producto.getPrecio());
-            System.out.println("ImagenBase64 recibida: " + (producto.getImagenBase64() != null ? "SÍ (longitud: " + producto.getImagenBase64().length() + ")" : "NO"));
 
-            // Procesar imagen base64 si existe
-            if (producto.getImagenBase64() != null && !producto.getImagenBase64().trim().isEmpty()) {
-                String base64Image = producto.getImagenBase64();
-
-                // Remover prefijo si existe
-                if (base64Image.contains(",")) {
-                    base64Image = base64Image.split(",")[1];
-                }
-
-                try {
-                    byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-                    String fileName = "producto_" + System.currentTimeMillis() + ".jpg";
-                    String uploadDir = "uploads/";
-                    Path directoryPath = Paths.get(uploadDir);
-
-                    if (!Files.exists(directoryPath)) {
-                        Files.createDirectories(directoryPath);
-                    }
-
-                    Files.write(directoryPath.resolve(fileName), imageBytes);
-                    producto.setImagenUrl("/uploads/" + fileName);
-                    System.out.println("Imagen guardada: " + producto.getImagenUrl());
-                } catch (Exception imageException) {
-                    System.err.println("Error procesando imagen: " + imageException.getMessage());
-                    imageException.printStackTrace();
-                }
-            }
-
-            // Limpiar imagenBase64 antes de guardar
-            producto.setImagenBase64(null);
-
-            Producto productoGuardado = productoService.guardar(producto);
-            System.out.println("Producto guardado con ID: " + productoGuardado.getId());
-            System.out.println("ImagenUrl final: " + productoGuardado.getImagenUrl());
-
-            return new ResponseEntity<>(productoGuardado, HttpStatus.CREATED);
-        } catch (Exception e) {
-            System.err.println("Error general: " + e.getMessage());
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
 }
