@@ -12,6 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,72 +90,52 @@ public class ProductoController {
     }
 
     @PostMapping("/crear-con-imagen")
-    public ResponseEntity<Producto> crearConImagen(@RequestBody ProductoCreateDto productoDto) {
+    public ResponseEntity<Producto> crearConImagen(@RequestBody Producto producto) {
         try {
-            System.out.println("Recibiendo solicitud para crear producto con imagen");
+            System.out.println("=== DEBUGGING CREAR CON IMAGEN ===");
+            System.out.println("Nombre: " + producto.getNombre());
+            System.out.println("Precio: " + producto.getPrecio());
+            System.out.println("ImagenBase64 recibida: " + (producto.getImagenBase64() != null ? "SÍ (longitud: " + producto.getImagenBase64().length() + ")" : "NO"));
 
-            // Validaciones básicas
-            if (productoDto.getNombre() == null || productoDto.getNombre().trim().isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
+            // Procesar imagen base64 si existe
+            if (producto.getImagenBase64() != null && !producto.getImagenBase64().trim().isEmpty()) {
+                String base64Image = producto.getImagenBase64();
 
-            // Crear un nuevo objeto Producto a partir del DTO
-            Producto producto = new Producto();
-            producto.setNombre(productoDto.getNombre());
-            producto.setPrecio(productoDto.getPrecio());
-            producto.setStock(productoDto.getStock());
-            producto.setDescripcion(productoDto.getDescripcion());
-            producto.setEspecificaciones(productoDto.getEspecificaciones());
-            
-            // Validar y establecer la imagen en base64
-            if (productoDto.getImagenBase64() != null && !productoDto.getImagenBase64().isEmpty()) {
-                System.out.println("Imagen recibida correctamente con longitud: " + productoDto.getImagenBase64().length());
-
-                // Asegurarse de que la imagen está en formato correcto
-                String base64Image = productoDto.getImagenBase64();
-
-                // Si la imagen ya incluye el prefijo "data:image/..." lo dejamos tal cual
-                // Si no lo tiene, asumimos que es un base64 puro y lo guardamos directamente
-                producto.setImagenBase64(base64Image);
-            } else {
-                System.out.println("No se recibió imagen o la imagen está vacía");
-            }
-            
-            // Obtener y establecer la categoría
-            if (productoDto.getCategoriaId() != null) {
-                Optional<Categoria> categoriaOpt = categoriaRepository.findById(productoDto.getCategoriaId());
-                if (categoriaOpt.isPresent()) {
-                    producto.setCategoria(categoriaOpt.get());
-                } else {
-                    System.out.println("Categoría no encontrada con ID: " + productoDto.getCategoriaId());
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                // Remover prefijo si existe
+                if (base64Image.contains(",")) {
+                    base64Image = base64Image.split(",")[1];
                 }
-            } else {
-                System.out.println("No se especificó categoría");
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            
-            // Obtener y establecer la marca
-            if (productoDto.getMarcaId() != null) {
-                Optional<Marca> marcaOpt = marcaRepository.findById(productoDto.getMarcaId());
-                if (marcaOpt.isPresent()) {
-                    producto.setMarca(marcaOpt.get());
-                } else {
-                    System.out.println("Marca no encontrada con ID: " + productoDto.getMarcaId());
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+                try {
+                    byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+                    String fileName = "producto_" + System.currentTimeMillis() + ".jpg";
+                    String uploadDir = "uploads/";
+                    Path directoryPath = Paths.get(uploadDir);
+
+                    if (!Files.exists(directoryPath)) {
+                        Files.createDirectories(directoryPath);
+                    }
+
+                    Files.write(directoryPath.resolve(fileName), imageBytes);
+                    producto.setImagenUrl("/uploads/" + fileName);
+                    System.out.println("Imagen guardada: " + producto.getImagenUrl());
+                } catch (Exception imageException) {
+                    System.err.println("Error procesando imagen: " + imageException.getMessage());
+                    imageException.printStackTrace();
                 }
-            } else {
-                System.out.println("No se especificó marca");
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            
-            // Guardar el producto
+
+            // Limpiar imagenBase64 antes de guardar
+            producto.setImagenBase64(null);
+
             Producto productoGuardado = productoService.guardar(producto);
-            System.out.println("Producto guardado correctamente con ID: " + productoGuardado.getId());
+            System.out.println("Producto guardado con ID: " + productoGuardado.getId());
+            System.out.println("ImagenUrl final: " + productoGuardado.getImagenUrl());
+
             return new ResponseEntity<>(productoGuardado, HttpStatus.CREATED);
         } catch (Exception e) {
-            System.out.println("Error al crear producto con imagen: " + e.getMessage());
-            e.printStackTrace(); // Log para depuración
+            System.err.println("Error general: " + e.getMessage());
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
