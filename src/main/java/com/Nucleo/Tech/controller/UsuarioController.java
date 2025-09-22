@@ -1,23 +1,85 @@
 package com.Nucleo.Tech.controller;
 
-
+import com.Nucleo.Tech.JwtUtil;
+import com.Nucleo.Tech.dto.LoginResponse;
+import com.Nucleo.Tech.dto.UserDto;
 import com.Nucleo.Tech.modelo.Usuario;
-import com.Nucleo.Tech.service.IUsuarioService;
+import com.Nucleo.Tech.service.UsuarioServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/usuarios")
+@RequestMapping("/auth")
 @CrossOrigin(origins = "*")
 public class UsuarioController {
 
     @Autowired
-    private IUsuarioService usuarioService;
+    private UsuarioServiceImpl usuarioService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // 🔹 Registro de usuarios
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody Usuario usuario) {
+        try {
+            usuarioService.registerUser(usuario);
+            return ResponseEntity.ok("Usuario registrado con éxito");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+    @PostMapping("/registerAdmin")
+    public ResponseEntity<String> registerAdmin(@RequestBody Usuario usuario) {
+        try {
+            usuarioService.guardarAdmin(usuario);
+            return ResponseEntity.ok("Usuario registrado con éxito");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    // 🔹 Login con correo
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserDto userDto) {
+        Usuario usuario = usuarioService.buscarPorEmail(userDto.getCorreo())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (passwordEncoder.matches(userDto.getPassword(), usuario.getContrasena())) {
+            String token = jwtUtil.generateToken(usuario.getCorreo());
+
+            // Devuelves token + info del usuario
+            return ResponseEntity.ok(
+                    new LoginResponse(
+                            token,
+                            usuario.getId(),
+                            usuario.getNombre(),
+                            usuario.getCorreo(),
+                            usuario.getRol().getTipo()  // 👈 Aquí envías el rol
+                    )
+            );
+        }
+
+        return ResponseEntity.status(401).body("Credenciales inválidas");
+    }
+
+    // 🔹 Ejemplo de endpoint protegido
+    @GetMapping("/resource")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> getProtectedResource() {
+        return ResponseEntity.ok("Este es un recurso protegido!");
+    }
 
 
     @GetMapping
@@ -33,15 +95,6 @@ public class UsuarioController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("/crear")
-    public ResponseEntity<Usuario> crear(@RequestBody Usuario usuario) {
-        if (usuarioService.buscarPorEmail(usuario.getCorreo()).isPresent()) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-
-        Usuario nuevoUsuario = usuarioService.guardar(usuario);
-        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
@@ -84,3 +137,4 @@ public class UsuarioController {
         }
     }
 }
+
