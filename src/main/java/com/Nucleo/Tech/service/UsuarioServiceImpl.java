@@ -5,6 +5,11 @@ import com.Nucleo.Tech.modelo.Usuario;
 import com.Nucleo.Tech.respository.IrolRepository;
 import com.Nucleo.Tech.respository.IusuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +26,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Autowired
     private IrolRepository rolRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -38,12 +45,39 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Transactional
     public Usuario guardar(Usuario usuario) {
         // Asignar siempre el rol "customer" por defecto
-        Rol rolCustomer = rolRepository.findAll().stream()
-                .filter(r -> r.getTipo().equalsIgnoreCase("customer"))
-                .findFirst()
+        Rol rolCustomer = rolRepository.findByTipo("customer")
                 .orElseThrow(() -> new RuntimeException("Rol 'customer' no encontrado"));
+
         usuario.setRol(rolCustomer);
+
+        // Encriptar la contraseña antes de guardar
+        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+
         return usuarioRepository.save(usuario);
+    }
+    @Override
+    @Transactional
+
+    public Usuario guardarAdmin(Usuario user) {
+        if (user.getCorreo() == null || user.getContrasena() == null || user.getNombre() == null) {
+            throw new IllegalArgumentException("Todos los campos son obligatorios");
+        }
+
+        if (usuarioRepository.findByCorreo(user.getCorreo()) != null) {
+            throw new RuntimeException("El correo ya está registrado");
+        }
+
+        Usuario newUser = new Usuario();
+        newUser.setNombre(user.getNombre());
+        newUser.setCorreo(user.getCorreo());
+        newUser.setContrasena(passwordEncoder.encode(user.getContrasena()));
+
+        Rol rolAdmin = rolRepository.findByTipo("admin")
+                .orElseThrow(() -> new RuntimeException("Rol 'admin' no encontrado"));
+
+        newUser.setRol(rolAdmin);
+
+        return usuarioRepository.save(newUser);
     }
 
     @Override
@@ -61,24 +95,60 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Usuario> buscarPorEmail(String email) {
-        return usuarioRepository.findAll().stream()
-                .filter(usuario -> usuario.getCorreo() != null &&
-                        usuario.getCorreo().equals(email))
-                .findFirst();
+        return Optional.ofNullable(usuarioRepository.findByCorreo(email));
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Usuario autenticar(String correo, String contrasena) {
-        return usuarioRepository.findAll().stream()
-                .filter(usuario -> usuario.getCorreo() != null &&
-                        usuario.getCorreo().equals(correo) &&
-                        usuario.getContrasena().equals(contrasena))
-                .findFirst()
-                .orElse(null);
+        Usuario user = usuarioRepository.findByCorreo(correo);
+        if (user != null && passwordEncoder.matches(contrasena, user.getContrasena())) {
+            return user;
+        }
+        return null;
     }
 
+    // 🔹 Nuevo usuario con rol "customer"
+    @Override
+    @Transactional
+    public Usuario registerUser(Usuario user) {
+        if (user.getCorreo() == null || user.getContrasena() == null || user.getNombre() == null) {
+            throw new IllegalArgumentException("Todos los campos son obligatorios");
+        }
 
+        if (usuarioRepository.findByCorreo(user.getCorreo()) != null) {
+            throw new RuntimeException("El correo ya está registrado");
+        }
 
+        Usuario newUser = new Usuario();
+        newUser.setNombre(user.getNombre());
+        newUser.setCorreo(user.getCorreo());
+        newUser.setContrasena(passwordEncoder.encode(user.getContrasena()));
 
+        Rol rolCustomer = rolRepository.findByTipo("customer")
+                .orElseThrow(() -> new RuntimeException("Rol 'customer' no encontrado"));
+
+        newUser.setRol(rolCustomer);
+
+        return usuarioRepository.save(newUser);
+    }
+
+    // 🔹 Integración con Spring Security
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Usuario user = usuarioRepository.findByCorreo(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("Usuario no encontrado");
+        }
+
+        // Convertir el rol a GrantedAuthority
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRol().getTipo().toUpperCase()));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getCorreo(),
+                user.getContrasena(),
+                authorities
+        );
+    }
 }

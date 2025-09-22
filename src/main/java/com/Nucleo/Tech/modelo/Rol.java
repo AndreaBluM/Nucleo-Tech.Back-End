@@ -18,6 +18,14 @@ public class Rol {
 
     public Rol() {
     }
+    public Rol(Long id, String tipo) {
+        this.id = id;
+        this.tipo = tipo;
+    }
+
+    public Rol(String tipo) {
+        this.tipo = tipo;
+    }
 
     public Rol(Long id, String tipo, List<Usuario> usuario) {
         this.id = id;
