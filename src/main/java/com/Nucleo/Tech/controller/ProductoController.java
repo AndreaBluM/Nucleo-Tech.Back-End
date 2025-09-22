@@ -1,11 +1,10 @@
 package com.Nucleo.Tech.controller;
 
-import com.Nucleo.Tech.dto.ProductoDto;
+import com.Nucleo.Tech.dto.ProductoCreateDto;
 import com.Nucleo.Tech.modelo.Categoria;
 import com.Nucleo.Tech.modelo.Marca;
 import com.Nucleo.Tech.modelo.Producto;
 import com.Nucleo.Tech.service.IProductoService;
-import com.Nucleo.Tech.respository.IproductoRepository;
 import com.Nucleo.Tech.respository.IcategoriaRepository;
 import com.Nucleo.Tech.respository.ImarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,23 +85,57 @@ public class ProductoController {
         return new ResponseEntity<>(productos, HttpStatus.OK);
     }
 
-    @PostMapping("/crear-dto")
-    public ResponseEntity<Producto> crearConDto(@RequestBody ProductoDto productoDto) {
-        Optional<Categoria> categoriaOpt = categoriaRepository.findById(productoDto.getCategoriaId());
-        Optional<Marca> marcaOpt = marcaRepository.findById(productoDto.getMarcaId());
-        if (categoriaOpt.isEmpty() || marcaOpt.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    @PostMapping("/crear-con-imagen")
+    public ResponseEntity<Producto> crearConImagen(@RequestBody ProductoCreateDto productoDto) {
+        try {
+            // Crear un nuevo objeto Producto a partir del DTO
+            Producto producto = new Producto();
+            producto.setNombre(productoDto.getNombre());
+            producto.setPrecio(productoDto.getPrecio());
+            producto.setStock(productoDto.getStock());
+            producto.setDescripcion(productoDto.getDescripcion());
+            producto.setEspecificaciones(productoDto.getEspecificaciones());
+            
+            // Validar y establecer la imagen en base64
+            if (productoDto.getImagenBase64() != null && !productoDto.getImagenBase64().isEmpty()) {
+                // Asegurarse de que la cadena base64 esté bien formateada
+                String base64Image = productoDto.getImagenBase64();
+
+                // Si la imagen incluye prefijo data:image/, lo conservamos tal cual
+                // ya que es un formato válido para mostrar en frontend
+                producto.setImagenBase64(base64Image);
+                System.out.println("Imagen recibida correctamente con longitud: " + base64Image.length());
+            } else {
+                System.out.println("No se recibió imagen o la imagen está vacía");
+            }
+            
+            // Obtener y establecer la categoría
+            if (productoDto.getCategoriaId() != null) {
+                Optional<Categoria> categoriaOpt = categoriaRepository.findById(productoDto.getCategoriaId());
+                if (categoriaOpt.isPresent()) {
+                    producto.setCategoria(categoriaOpt.get());
+                } else {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+            }
+            
+            // Obtener y establecer la marca
+            if (productoDto.getMarcaId() != null) {
+                Optional<Marca> marcaOpt = marcaRepository.findById(productoDto.getMarcaId());
+                if (marcaOpt.isPresent()) {
+                    producto.setMarca(marcaOpt.get());
+                } else {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+            }
+            
+            // Guardar el producto
+            Producto productoGuardado = productoService.guardar(producto);
+            return new ResponseEntity<>(productoGuardado, HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log para depuración
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        Producto producto = new Producto();
-        producto.setNombre(productoDto.getNombre());
-        producto.setPrecio(productoDto.getPrecio());
-        producto.setStock(productoDto.getStock());
-        producto.setDescripcion(productoDto.getDescripcion());
-        producto.setEspecificaciones(productoDto.getEspecificaciones());
-        producto.setImagenBase64(productoDto.getImagenBase64());
-        producto.setCategoria(categoriaOpt.get());
-        producto.setMarca(marcaOpt.get());
-        Producto nuevoProducto = productoService.guardar(producto);
-        return new ResponseEntity<>(nuevoProducto, HttpStatus.CREATED);
     }
+
 }
