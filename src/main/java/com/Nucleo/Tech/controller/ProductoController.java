@@ -88,6 +88,8 @@ public class ProductoController {
     @PostMapping("/crear-con-imagen")
     public ResponseEntity<Producto> crearConImagen(@RequestBody ProductoCreateDto productoDto) {
         try {
+            System.out.println("Recibiendo solicitud para crear producto con imagen");
+
             // Crear un nuevo objeto Producto a partir del DTO
             Producto producto = new Producto();
             producto.setNombre(productoDto.getNombre());
@@ -98,13 +100,8 @@ public class ProductoController {
             
             // Validar y establecer la imagen en base64
             if (productoDto.getImagenBase64() != null && !productoDto.getImagenBase64().isEmpty()) {
-                // Asegurarse de que la cadena base64 esté bien formateada
-                String base64Image = productoDto.getImagenBase64();
-
-                // Si la imagen incluye prefijo data:image/, lo conservamos tal cual
-                // ya que es un formato válido para mostrar en frontend
-                producto.setImagenBase64(base64Image);
-                System.out.println("Imagen recibida correctamente con longitud: " + base64Image.length());
+                System.out.println("Imagen recibida correctamente con longitud: " + productoDto.getImagenBase64().length());
+                producto.setImagenBase64(productoDto.getImagenBase64());
             } else {
                 System.out.println("No se recibió imagen o la imagen está vacía");
             }
@@ -115,6 +112,7 @@ public class ProductoController {
                 if (categoriaOpt.isPresent()) {
                     producto.setCategoria(categoriaOpt.get());
                 } else {
+                    System.out.println("Categoría no encontrada con ID: " + productoDto.getCategoriaId());
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
@@ -125,18 +123,20 @@ public class ProductoController {
                 if (marcaOpt.isPresent()) {
                     producto.setMarca(marcaOpt.get());
                 } else {
+                    System.out.println("Marca no encontrada con ID: " + productoDto.getMarcaId());
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
             
             // Guardar el producto
             Producto productoGuardado = productoService.guardar(producto);
+            System.out.println("Producto guardado correctamente con ID: " + productoGuardado.getId());
             return new ResponseEntity<>(productoGuardado, HttpStatus.CREATED);
         } catch (Exception e) {
+            System.out.println("Error al crear producto con imagen: " + e.getMessage());
             e.printStackTrace(); // Log para depuración
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
 }
-
