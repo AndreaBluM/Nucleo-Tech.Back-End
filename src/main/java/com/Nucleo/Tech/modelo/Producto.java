@@ -1,6 +1,7 @@
 package com.Nucleo.Tech.modelo;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class Producto {
     private String especificaciones;
 
     @Lob
+    @JsonProperty("imagenBase64")
     private String imagenBase64;
 
     @ManyToOne
